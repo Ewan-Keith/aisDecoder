@@ -1,4 +1,0 @@
-[0m[[0m[31merror[0m] [0m[0m/home/ewan/Documents/aisDecoder/src/test/scala/convertAisTests.scala:7:45: not found: type TryValues[0m
-[0m[[0m[31merror[0m] [0m[0mclass convertAisTests extends FlatSpec with TryValues {[0m
-[0m[[0m[31merror[0m] [0m[0m                                            ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
