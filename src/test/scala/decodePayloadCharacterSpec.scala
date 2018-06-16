@@ -1,10 +1,9 @@
 package com.ewankeith.aisdecoder
 
 import org.scalatest.FlatSpec
-import org.scalatest.PrivateMethodTester
 import scala.util.{ Try, Success, Failure }
 
-class convertAisTests extends FlatSpec {
+class decodePayloadCharacterSpec extends FlatSpec {
 
   // define valid AIS message payload characters
   private val validChars: List[Char] =
@@ -18,16 +17,16 @@ class convertAisTests extends FlatSpec {
       (88 to 95).map(_.toByte).toList)
       .map(_.toChar)
 
-  "checkPayloadChar" should "return Success(char) for valid chars" in {
+  "checkPayloadChar" should "return Success[char] for valid chars" in {
     validChars foreach { char =>
-      val successful = convertAis.checkPayloadChar(validChars)(char)
+      val successful = decodePayloadCharacter.checkPayloadChar(validChars)(char)
       assert(successful === Success(char))
     }
   }
 
   it should "return Failure(x) for invalid chars" in {
     invalidChars foreach { char =>
-      val failed = convertAis.checkPayloadChar(validChars)(char)
+      val failed = decodePayloadCharacter.checkPayloadChar(validChars)(char)
       failed match {
         case Failure(e) =>
           assert(e.getMessage === s"Invalid AIS payload character found: $char")
@@ -47,13 +46,13 @@ class convertAisTests extends FlatSpec {
 
   "charToSixBit" should "return Success[Int] with input Success[char]" in {
     successCharacters foreach { input =>
-      val result = convertAis.charToSixBit(input)
+      val result = decodePayloadCharacter.charToSixBit(input)
       assert(result.isSuccess)
     }
   }
 
   it should "calculate correct character => six bit decmial values" in {
-    val testResults = successCharacters.map(convertAis.charToSixBit)
+    val testResults = successCharacters.map(decodePayloadCharacter.charToSixBit)
     val comparisons = testResults zip successSixBitConversions
     comparisons foreach {
       case (test, correct) =>
@@ -63,7 +62,7 @@ class convertAisTests extends FlatSpec {
 
   it should "return Failure(msg) when provided Failure(msg)" in {
     val failureInput = Failure(new Exception("test message"))
-    val failureOutput = convertAis.charToSixBit(failureInput)
+    val failureOutput = decodePayloadCharacter.charToSixBit(failureInput)
     failureOutput match {
       case Failure(e) =>
         assert(e.getMessage === "test message")
@@ -71,6 +70,18 @@ class convertAisTests extends FlatSpec {
         fail("charToSixBit returned Success when input a Failure")
     }
   }
+  
+  it should "return Failure if an invalid character is provided" in {
+    val failureOutput = decodePayloadCharacter.charToSixBit(Success('Z'))
+    failureOutput match {
+      case Failure(e) =>
+        assert(e.getMessage === 
+          "Bit arithmetic error occured during payload conversion")
+      case Success(_) =>
+        fail("charToSixBit returned Success when input a Failure")
+    }
+  }
+  
   
   // define valid Success six bit integers
   private val successInts = List(0, 13, 39, 40, 52, 63)
@@ -83,13 +94,13 @@ class convertAisTests extends FlatSpec {
 
   "sixBitIntToBinary" should "return Success[String] with input Success[Int]" in {
     successInts foreach { input =>
-      val result = convertAis.sixBitIntToBinary(input)
+      val result = decodePayloadCharacter.sixBitIntToBinary(input)
       assert(result.isSuccess)
     }
   }
   
     it should "calculate correct Int => bit stream Strings" in {
-    val testResults = successInts.map(convertAis.sixBitIntToBinary)
+    val testResults = successInts.map(decodePayloadCharacter.sixBitIntToBinary)
     val comparisons = testResults zip successBitStreams
     comparisons foreach {
       case (test, correct) =>
@@ -99,12 +110,30 @@ class convertAisTests extends FlatSpec {
 
   it should "return Failure(msg) when provided Failure(msg)" in {
     val failureInput = Failure(new Exception("test message"))
-    val failureOutput = convertAis.sixBitIntToBinary(failureInput)
+    val failureOutput = decodePayloadCharacter.sixBitIntToBinary(failureInput)
     failureOutput match {
       case Failure(e) =>
         assert(e.getMessage === "test message")
       case Success(_) =>
         fail("sixBitIntToBinary returned Success when input a Failure")
+    }
+  }
+  
+
+  "charToBinary" should "return Success[String] for valid chars" in {
+    val result = decodePayloadCharacter.charToBinary('K')
+    assert(result === Success("011011"))
+  }
+
+  it should "return Failure(x) for invalid chars" in {
+    invalidChars foreach { char =>
+      val failed = decodePayloadCharacter.charToBinary(char)
+      failed match {
+        case Failure(e) =>
+          assert(e.getMessage === s"Invalid AIS payload character found: $char")
+        case Success(_) =>
+          fail("checkAisChar returned Success for an invalid character: $char")
+      }
     }
   }
 
