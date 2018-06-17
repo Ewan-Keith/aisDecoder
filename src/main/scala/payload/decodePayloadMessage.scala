@@ -1,4 +1,4 @@
-package com.ewankeith.aisdecoder
+package com.ewankeith.aisdecoder.payload
 
 import scala.util.{ Try, Success, Failure }
 

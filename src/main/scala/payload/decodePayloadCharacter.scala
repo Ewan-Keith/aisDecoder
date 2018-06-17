@@ -1,4 +1,4 @@
-package com.ewankeith.aisdecoder
+package com.ewankeith.aisdecoder.payload
 
 import scala.util.{ Try, Success, Failure }
 
@@ -41,10 +41,14 @@ object decodePayloadCharacter {
   def sixBitIntToBinary(decimalInt: Try[Int]): Try[String] =
     decimalInt match {
       case Success(decimalInt) => Try(
-        String.format("%6s", decimalInt.toBinaryString).replace(' ', '0'))
+        String.format("%6s", decimalInt.toBinaryString)
+        .replace(' ', '0')
+        )
       case Failure(msg) => Failure(msg)
     }
 
   // compose converters, prevents multiple traversals of input String
   def charToBinary = sixBitIntToBinary _ compose charToSixBit _ compose checkPayloadChar(validChars)
 }
+
+case class BitStream(sixBitInt: Int)
