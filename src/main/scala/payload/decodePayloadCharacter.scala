@@ -11,7 +11,7 @@ object decodePayloadCharacter {
       .map(_.toChar)
 
   // check if message char is valid, if not return a Failure
-  // curried so list of valid Chars is fed in later
+  // curried so list of valid Chars can be fed in at call time
   def checkPayloadChar(valid: List[Char]): Char => Try[Char] =
     char => {
       if (valid.contains(char))
@@ -21,34 +21,13 @@ object decodePayloadCharacter {
     }
 
   // convert a character to 6 bit decimal representation
-  def charToSixBit(char: Try[Char]): Try[Int] =
+  def charToBitStream(char: Try[Char]): Try[List[Int]] =
     char match {
-      case Success(char) => eightToSixBitCalculation(char.toByte)
+      case Success(char) => PayloadByte(char.toByte).asBitStream
       case Failure(msg)  => Failure(msg)
     }
 
-  // carries out the numerical 8 bit to 6 bit decimal conversion
-  private def eightToSixBitCalculation(eightBit: Byte): Try[Int] = {
-    if (eightBit >= 48 && eightBit <= 87)
-      Try(eightBit - 48)
-    else if (eightBit >= 96 && eightBit <= 119)
-      Try(eightBit - 56)
-    else
-      Failure(new Exception("Bit arithmetic error occured during payload conversion"))
-  }
-
-  // convert the decimal six bit value to a bit string
-  def sixBitIntToBinary(decimalInt: Try[Int]): Try[String] =
-    decimalInt match {
-      case Success(decimalInt) => Try(
-        String.format("%6s", decimalInt.toBinaryString)
-        .replace(' ', '0')
-        )
-      case Failure(msg) => Failure(msg)
-    }
-
   // compose converters, prevents multiple traversals of input String
-  def charToBinary = sixBitIntToBinary _ compose charToSixBit _ compose checkPayloadChar(validChars)
+  def charToBinary = charToBitStream _ compose checkPayloadChar(validChars)
 }
 
-case class BitStream(sixBitInt: Int)

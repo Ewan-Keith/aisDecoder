@@ -7,7 +7,8 @@ class decodePayloadMessageSpec extends FlatSpec {
 
   private val validPayload = "14eG;o"
   private val validPayloadDecoded =
-    Success("000001000100101101010111001011110111")
+    Success(List(0,0,0,0,0,1,0,0,0,1,0,0,1,0,1,
+        1,0,1,0,1,0,1,1,1,0,0,1,0,1,1,1,1,0,1,1,1))
   private val invalidPayload = "14eZG;o"
   private val invalidPayloadMulti = "1Y4eZG;o"
 

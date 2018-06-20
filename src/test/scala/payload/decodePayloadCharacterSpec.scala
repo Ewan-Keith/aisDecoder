@@ -43,46 +43,8 @@ class decodePayloadCharacterSpec extends FlatSpec {
   // define Success[Int] 6 bit decimals for successCharacters list
   private val successSixBitConversions = List(0, 7, 12, 15, 16, 40, 57)
     .map(Success(_))
-
-  "charToSixBit" should "return Success[Int] with input Success[char]" in {
-    successCharacters foreach { input =>
-      val result = decodePayloadCharacter.charToSixBit(input)
-      assert(result.isSuccess)
-    }
-  }
-
-  it should "calculate correct character => six bit decmial values" in {
-    val testResults = successCharacters.map(decodePayloadCharacter.charToSixBit)
-    val comparisons = testResults zip successSixBitConversions
-    comparisons foreach {
-      case (test, correct) =>
-        assert(test === correct)
-    }
-  }
-
-  it should "return Failure(msg) when provided Failure(msg)" in {
-    val failureInput = Failure(new Exception("test message"))
-    val failureOutput = decodePayloadCharacter.charToSixBit(failureInput)
-    failureOutput match {
-      case Failure(e) =>
-        assert(e.getMessage === "test message")
-      case Success(_) =>
-        fail("charToSixBit returned Success when input a Failure")
-    }
-  }
   
-  it should "return Failure if an invalid character is provided" in {
-    val failureOutput = decodePayloadCharacter.charToSixBit(Success('Z'))
-    failureOutput match {
-      case Failure(e) =>
-        assert(e.getMessage === 
-          "Bit arithmetic error occured during payload conversion")
-      case Success(_) =>
-        fail("charToSixBit returned Success when input a Failure")
-    }
-  }
-  
-  
+
   // define valid Success six bit integers
   private val successInts = List(0, 13, 39, 40, 52, 63)
   .map(Success(_))
@@ -91,38 +53,11 @@ class decodePayloadCharacterSpec extends FlatSpec {
   private val successBitStreams =
     List("000000", "001101", "100111", "101000", "110100", "111111")
       .map(Success(_))
-
-  "sixBitIntToBinary" should "return Success[String] with input Success[Int]" in {
-    successInts foreach { input =>
-      val result = decodePayloadCharacter.sixBitIntToBinary(input)
-      assert(result.isSuccess)
-    }
-  }
-  
-    it should "calculate correct Int => bit stream Strings" in {
-    val testResults = successInts.map(decodePayloadCharacter.sixBitIntToBinary)
-    val comparisons = testResults zip successBitStreams
-    comparisons foreach {
-      case (test, correct) =>
-        assert(test === correct)
-    }
-  }
-
-  it should "return Failure(msg) when provided Failure(msg)" in {
-    val failureInput = Failure(new Exception("test message"))
-    val failureOutput = decodePayloadCharacter.sixBitIntToBinary(failureInput)
-    failureOutput match {
-      case Failure(e) =>
-        assert(e.getMessage === "test message")
-      case Success(_) =>
-        fail("sixBitIntToBinary returned Success when input a Failure")
-    }
-  }
   
 
-  "charToBinary" should "return Success[String] for valid chars" in {
+  "charToBinary" should "return Success[List[Int]] for valid chars" in {
     val result = decodePayloadCharacter.charToBinary('K')
-    assert(result === Success("011011"))
+    assert(result === Success(List(0, 1, 1, 0, 1, 1)))
   }
 
   it should "return Failure(x) for invalid chars" in {
