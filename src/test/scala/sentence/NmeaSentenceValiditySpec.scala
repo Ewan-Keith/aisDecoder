@@ -14,8 +14,8 @@ class NmeaSentenceValiditySpec extends FlatSpec {
     .fromURL(getClass.getResource("/invalid-nmea-structures.txt"))
     .getLines.toList
 
-  "NmeaExceptionFactory" should "return a custom NMEA exception" in {
-    val testExcept = NmeaSentenceValidity.NmeaExceptionFactory("test message")
+  "nmeaExceptionFactory" should "return a custom NMEA exception" in {
+    val testExcept = NmeaSentenceValidity.nmeaExceptionFactory("test message")
     assert(testExcept.isInstanceOf[Exception])
     assert(testExcept.getMessage === "Invalid NMEA Sentence: test message")
   }
@@ -48,7 +48,7 @@ class NmeaSentenceValiditySpec extends FlatSpec {
 
   it should "pass on Failure(e) unchanged" in {
     val testFailure = Failure(
-      NmeaSentenceValidity.NmeaExceptionFactory("test message"))
+      NmeaSentenceValidity.nmeaExceptionFactory("test message"))
     val triedStructure = NmeaSentenceValidity.tryCommaStructure(testFailure)
     
     triedStructure match {
@@ -88,7 +88,7 @@ class NmeaSentenceValiditySpec extends FlatSpec {
     
       it should "pass on Failure(e) unchanged" in {
     val testFailure = Failure(
-      NmeaSentenceValidity.NmeaExceptionFactory("test message"))
+      NmeaSentenceValidity.nmeaExceptionFactory("test message"))
     val triedStart = NmeaSentenceValidity.tryStartCharacter(testFailure)
     
     triedStart match {
@@ -128,7 +128,7 @@ class NmeaSentenceValiditySpec extends FlatSpec {
     
       it should "pass on Failure(e) unchanged" in {
     val testFailure = Failure(
-      NmeaSentenceValidity.NmeaExceptionFactory("test message"))
+      NmeaSentenceValidity.nmeaExceptionFactory("test message"))
     val triedLength = NmeaSentenceValidity.tryIdentifierLength(testFailure)
     
     triedLength match {
@@ -168,7 +168,7 @@ class NmeaSentenceValiditySpec extends FlatSpec {
     
       it should "pass on Failure(e) unchanged" in {
     val testFailure = Failure(
-      NmeaSentenceValidity.NmeaExceptionFactory("test message"))
+      NmeaSentenceValidity.nmeaExceptionFactory("test message"))
     val triedCase = NmeaSentenceValidity.tryIdentifierCase(testFailure)
     
     triedCase match {
