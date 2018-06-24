@@ -27,6 +27,7 @@ object decodePayloadCharacter {
       case Failure(msg)  => Failure(msg)
     }
 
+ 
   // compose converters, prevents multiple traversals of input String
   def charToBinary = charToBitStream _ compose checkPayloadChar(validChars)
 }
