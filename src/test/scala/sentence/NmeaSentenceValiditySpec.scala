@@ -15,7 +15,9 @@ class NmeaSentenceValiditySpec extends FlatSpec {
     .getLines.toList
 
   "NmeaExceptionFactory" should "return a custom NMEA exception" in {
-
+    val testExcept = NmeaSentenceValidity.NmeaExceptionFactory("test message")
+    assert(testExcept.isInstanceOf[Exception])
+    assert(testExcept.getMessage === "Invalid NMEA Sentence: test message")
   }
 
   "checkStructure" should "return Success(msg) for valid sentence structure" in {
