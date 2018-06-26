@@ -14,12 +14,9 @@ class NmeaSentenceValiditySpec extends FlatSpec {
     .fromURL(getClass.getResource("/invalid-nmea-structures.txt"))
     .getLines.toList
 
-  "nmeaExceptionFactory" should "return a custom NMEA exception" in {
-    val testExcept = NmeaSentenceValidity.nmeaExceptionFactory("test message")
-    assert(testExcept.isInstanceOf[Exception])
-    assert(testExcept.getMessage === "Invalid NMEA Sentence: test message")
-  }
-  
+  val testFailure = Failure(
+    new Exception("Invalid NMEA Sentence: test message"))
+
   val invalidCommaStruct = List("abcd", "!AIVDM;123", "1:2:3:4:5")
 
   "tryCommaStructure" should "return Success(msg) for valid comma structure" in {
@@ -47,10 +44,8 @@ class NmeaSentenceValiditySpec extends FlatSpec {
   }
 
   it should "pass on Failure(e) unchanged" in {
-    val testFailure = Failure(
-      NmeaSentenceValidity.nmeaExceptionFactory("test message"))
     val triedStructure = NmeaSentenceValidity.tryCommaStructure(testFailure)
-    
+
     triedStructure match {
       case Success(msg) =>
         fail("tryCommaStructure returned Success when input Failure(e)")
@@ -72,8 +67,8 @@ class NmeaSentenceValiditySpec extends FlatSpec {
         }
       })
   }
-  
-    it should "return Failure(e) for invalid start character" in {
+
+  it should "return Failure(e) for invalid start character" in {
     invalidStart.foreach(
       sntnc => {
         NmeaSentenceValidity.tryStartCharacter(Try(sntnc)) match {
@@ -85,12 +80,10 @@ class NmeaSentenceValiditySpec extends FlatSpec {
         }
       })
   }
-    
-      it should "pass on Failure(e) unchanged" in {
-    val testFailure = Failure(
-      NmeaSentenceValidity.nmeaExceptionFactory("test message"))
+
+  it should "pass on Failure(e) unchanged" in {
     val triedStart = NmeaSentenceValidity.tryStartCharacter(testFailure)
-    
+
     triedStart match {
       case Success(msg) =>
         fail("tryStartCharacter returned Success when input Failure(e)")
@@ -98,7 +91,7 @@ class NmeaSentenceValiditySpec extends FlatSpec {
         "Invalid NMEA Sentence: test message")
     }
   }
-      
+
   val validIdentLength = List("!AIVDM", "$AIVDM", "test12")
   val invalidIdentLength = List("AIVDM", "!AIVD", "$AIVDMO", "")
 
@@ -112,8 +105,8 @@ class NmeaSentenceValiditySpec extends FlatSpec {
         }
       })
   }
-  
-    it should "return Failure(e) for invalid identifier length" in {
+
+  it should "return Failure(e) for invalid identifier length" in {
     invalidIdentLength.foreach(
       sntnc => {
         NmeaSentenceValidity.tryIdentifierLength(Try(sntnc)) match {
@@ -125,12 +118,10 @@ class NmeaSentenceValiditySpec extends FlatSpec {
         }
       })
   }
-    
-      it should "pass on Failure(e) unchanged" in {
-    val testFailure = Failure(
-      NmeaSentenceValidity.nmeaExceptionFactory("test message"))
+
+  it should "pass on Failure(e) unchanged" in {
     val triedLength = NmeaSentenceValidity.tryIdentifierLength(testFailure)
-    
+
     triedLength match {
       case Success(msg) =>
         fail("tryIdentifierLength returned Success when input Failure(e)")
@@ -138,7 +129,7 @@ class NmeaSentenceValiditySpec extends FlatSpec {
         "Invalid NMEA Sentence: test message")
     }
   }
-      
+
   val validIdentCase = List("!AIVDM", "$!AIVDM")
   val invalidIdentCase = List("!AIVDm", "!aIVDM", "$AiVDM")
 
@@ -152,8 +143,8 @@ class NmeaSentenceValiditySpec extends FlatSpec {
         }
       })
   }
-  
-    it should "return Failure(e) for invalid identifier case" in {
+
+  it should "return Failure(e) for invalid identifier case" in {
     invalidIdentCase.foreach(
       sntnc => {
         NmeaSentenceValidity.tryIdentifierCase(Try(sntnc)) match {
@@ -165,15 +156,88 @@ class NmeaSentenceValiditySpec extends FlatSpec {
         }
       })
   }
-    
-      it should "pass on Failure(e) unchanged" in {
-    val testFailure = Failure(
-      NmeaSentenceValidity.nmeaExceptionFactory("test message"))
+
+  it should "pass on Failure(e) unchanged" in {
     val triedCase = NmeaSentenceValidity.tryIdentifierCase(testFailure)
-    
+
     triedCase match {
       case Success(msg) =>
         fail("tryIdentifierCase returned Success when input Failure(e)")
+      case Failure(e) => assert(e.getMessage ===
+        "Invalid NMEA Sentence: test message")
+    }
+  }
+
+  val invalidIdentCollection = invalidStart :::
+    invalidIdentLength ::: invalidIdentCase
+
+  "tryIdentifier" should "return Success(msg) for valid identifier" in {
+    validAivdm.foreach(
+      sntnc => {
+        NmeaSentenceValidity.tryIdentifier(Try(sntnc)) match {
+          case Success(msg) => assert(msg === sntnc)
+          case Failure(e) =>
+            fail("tryIdentifier returned Failure for valid identifier")
+        }
+      })
+  }
+
+  it should "return Failure(e) for invalid nmea identifiers" in {
+    invalidIdentCollection.foreach(
+      sntnc => {
+        NmeaSentenceValidity.tryIdentifier(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryIdentifier returned Success for invalid identifier")
+          case Failure(e) =>
+            assert(e.getMessage.startsWith(
+              "Invalid NMEA Sentence: "))
+        }
+      })
+  }
+
+  it should "pass on Failure(e) unchanged" in {
+    val triedCase = NmeaSentenceValidity.tryIdentifier(testFailure)
+
+    triedCase match {
+      case Success(msg) =>
+        fail("tryIdentifier returned Success when input Failure(e)")
+      case Failure(e) => assert(e.getMessage ===
+        "Invalid NMEA Sentence: test message")
+    }
+  }
+
+  val invalidNmeaCollection = invalidIdentCollection ::: invalidNmeaStruct
+
+  "tryValidity" should "return Success(msg) for valid NMEA sentence" in {
+    validAivdm.foreach(
+      sntnc => {
+        NmeaSentenceValidity.tryValidity(Try(sntnc)) match {
+          case Success(msg) => assert(msg === sntnc)
+          case Failure(e) =>
+            fail("tryValidity returned Failure for valid NMEA sentence")
+        }
+      })
+  }
+
+  it should "return Failure(e) for invalid nmea sentences" in {
+    invalidNmeaCollection.foreach(
+      sntnc => {
+        NmeaSentenceValidity.tryValidity(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryValidity returned Success for invalid identifier")
+          case Failure(e) =>
+            assert(e.getMessage.startsWith(
+              "Invalid NMEA Sentence: "))
+        }
+      })
+  }
+
+  it should "pass on Failure(e) unchanged" in {
+    val triedCase = NmeaSentenceValidity.tryValidity(testFailure)
+
+    triedCase match {
+      case Success(msg) =>
+        fail("tryValidity returned Success when input Failure(e)")
       case Failure(e) => assert(e.getMessage ===
         "Invalid NMEA Sentence: test message")
     }
