@@ -30,7 +30,7 @@ case class PayloadByte(eightBitDecimal: Byte) {
   override def toString =
     this.asBitStream match {
       case Success(list) => list.mkString
-      case Failure(msg)  => Failure(msg).toString
+      case Failure(msg)  => msg.toString
     }
 
 }

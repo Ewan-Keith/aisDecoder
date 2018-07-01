@@ -46,10 +46,10 @@ object NmeaSentenceValidity {
       "First field is not upper case")(sentence)
 
   // compose the identifier checks together
-  def tryIdentifier =
+  def tryIdentifier: Try[String] => Try[String] =
     tryIdentifierCase _ compose tryStartCharacter _ compose tryIdentifierLength _
 
   // compose identifier and comma structure checks together
-  def tryValidity = tryIdentifier compose tryCommaStructure _
-
+  def tryValidity: Try[String] => Try[String] =
+    tryIdentifier compose tryCommaStructure _
 }

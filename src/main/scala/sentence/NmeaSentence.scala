@@ -3,7 +3,7 @@ package com.ewankeith.aisdecoder.sentence
 import scala.util.{ Try, Success, Failure }
 
 case class NmeaSentence(sentence: String) {
-  
+
   // defines a List representation of the string split by comma
   def asList: Try[List[String]] = Try(sentence.split(',').toList)
 

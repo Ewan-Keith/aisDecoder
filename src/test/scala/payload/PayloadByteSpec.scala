@@ -72,9 +72,15 @@ class PayloadByteSpec extends FlatSpec {
         fail("asSixBitDecimal returned Success for an invalid byte")
     }
   }
-  
+
   it should "return correct bitstream as string for valid byte value" in {
     assert(validByte.toString === "001000")
     assert(validByteHigh.toString === "111110")
+  }
+
+  it should "pass on early Failures unchanged" in {
+    val earlyFailure = PayloadByte(30.toByte).toString
+    assert(earlyFailure ===
+      "java.lang.Exception: Invalid payload byte in PayloadBit conversion: 30")
   }
 }
