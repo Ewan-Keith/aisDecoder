@@ -29,7 +29,7 @@ object AisSentenceValidity {
         case Failure(e) => Failure(e)
       }
   }
-
+    
   // check that the sentence has 7 fields
   def tryLengthSeven(sentence: Try[String]): Try[String] =
     validChkFactory(
@@ -49,6 +49,10 @@ object AisSentenceValidity {
       "No valid checksum provided")(sentence)
 
   // check that checksum is valid
+      def tryChecksumValid(sentence: Try[String]): Try[String] =
+        validChkFactory(
+            x => NmeaChecksum.isValid(x),
+      "Checksum is invalid")(sentence)
 
   // check that field 3 isn't greater than field 2
 
