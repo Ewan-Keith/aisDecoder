@@ -163,5 +163,5 @@ class AisSentenceValiditySpec extends FlatSpec {
         "Invalid AIS Sentence: test message")
     }
   }
-  
+
 }

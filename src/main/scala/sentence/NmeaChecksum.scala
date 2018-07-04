@@ -14,5 +14,4 @@ object NmeaChecksum {
 
     checksumFormatted == checkSum
   }
-
 }

@@ -14,10 +14,8 @@ object decodePayloadCharacter {
   // curried so list of valid Chars can be fed in at call time
   def checkPayloadChar(valid: List[Char]): Char => Try[Char] =
     char => {
-      if (valid.contains(char))
-        Try(char)
-      else
-        Failure(new Exception(s"Invalid AIS payload character found: $char"))
+      if (valid.contains(char)) { Try(char) }
+      else { Failure(new Exception(s"Invalid AIS payload character found: $char")) }
     }
 
   // convert a character to 6 bit decimal representation
@@ -27,8 +25,7 @@ object decodePayloadCharacter {
       case Failure(msg)  => Failure(msg)
     }
 
- 
   // compose converters, prevents multiple traversals of input String
-  def charToBinary = charToBitStream _ compose checkPayloadChar(validChars)
+  def charToBinary: Char => Try[List[Int]] =
+    charToBitStream _ compose checkPayloadChar(validChars)
 }
-

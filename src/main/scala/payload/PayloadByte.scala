@@ -6,14 +6,14 @@ case class PayloadByte(eightBitDecimal: Byte) {
 
   // six bit decimal representation, catches any invalid 8 bit inputs
   def asSixBitDecimal: Try[Int] = {
-    if (eightBitDecimal >= 48 && eightBitDecimal <= 87)
+    if (eightBitDecimal >= 48 && eightBitDecimal <= 87) {
       Try(eightBitDecimal - 48)
-    else if (eightBitDecimal >= 96 && eightBitDecimal <= 119)
+    } else if (eightBitDecimal >= 96 && eightBitDecimal <= 119) {
       Try(eightBitDecimal - 56)
-    else
+    } else {
       Failure(new Exception(
         s"Invalid payload byte in PayloadBit conversion: $eightBitDecimal"))
-  }
+  }}
 
   // sixBitDecimal as a six long bit stream, as a List[Int].
   def asBitStream: Try[List[Int]] =
@@ -27,7 +27,7 @@ case class PayloadByte(eightBitDecimal: Byte) {
     }
 
   // to print as a single string
-  override def toString =
+  override def toString: String =
     this.asBitStream match {
       case Success(list) => list.mkString
       case Failure(msg)  => msg.toString

@@ -6,7 +6,7 @@ object AisSentenceValidity {
 
   // valid field length of AIS messages
   private val validLength = 7
-  
+
   // define all valid identifier for AIS messages
   private val validIdent = for {
     starts <- List("!AD", "!AI", "!AN", "!AR", "!AS", "!AT", "!AX", "!BS", "!SA")
@@ -29,7 +29,7 @@ object AisSentenceValidity {
         case Failure(e) => Failure(e)
       }
   }
-    
+
   // check that the sentence has 7 fields
   def tryLengthSeven(sentence: Try[String]): Try[String] =
     validChkFactory(
@@ -43,19 +43,27 @@ object AisSentenceValidity {
       "Not valid AIS identifier")(sentence)
 
   // check that checksum is used (mandatory for AIS messages)
-      def tryChecksumPresent(sentence: Try[String]): Try[String] =
-            validChkFactory(
+  def tryChecksumPresent(sentence: Try[String]): Try[String] =
+    validChkFactory(
       x => x.matches("^.*\\*[0-9a-fA-F]{2}$"),
       "No valid checksum provided")(sentence)
 
   // check that checksum is valid
-      def tryChecksumValid(sentence: Try[String]): Try[String] =
-        validChkFactory(
-            x => NmeaChecksum.isValid(x),
+  def tryChecksumValid(sentence: Try[String]): Try[String] =
+    validChkFactory(
+      x => NmeaChecksum.isValid(x),
       "Checksum is invalid")(sentence)
 
   // check that field 3 isn't greater than field 2
+  def tryFieldThreeLteTwo(sentence: Try[String]): Try[String] =
+    validChkFactory(
+      x => x.split(',')(1) <= x.split(',')(2),
+      "Field 2 greater than field 3")(sentence)
 
   // check that field 5 is 'A', 'B', '1', '2' or empty (all appear in the wild)
+  def tryFieldFiveValid(sentence: Try[String]): Try[String] =
+    validChkFactory(
+      x => List("A", "B", "1", "2", "").contains(x.split(',')(4)),
+      "Field 5 is not 'A', 'B', '1', '2' or empty")(sentence)
 
 }
