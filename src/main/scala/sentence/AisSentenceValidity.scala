@@ -66,4 +66,14 @@ object AisSentenceValidity {
       x => List("A", "B", "1", "2", "").contains(x.split(',')(4)),
       "Field 5 is not 'A', 'B', '1', '2' or empty")(sentence)
 
+  // compose checksum checks into one test
+  def tryChecksum: Try[String] => Try[String] =
+    tryChecksumValid _ compose tryChecksumPresent _
+  
+    
+    // compose checksum checks with rest of the AIS specific checks
+  def tryValidity: Try[String] => Try[String] = {
+    tryChecksum compose tryFieldFiveValid _ compose 
+    tryFieldThreeLteTwo _ compose tryValidIdent _ compose tryLengthSeven _
+  }
 }
