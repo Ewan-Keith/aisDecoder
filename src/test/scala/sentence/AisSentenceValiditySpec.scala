@@ -164,4 +164,87 @@ class AisSentenceValiditySpec extends FlatSpec {
     }
   }
 
+  val invalidFieldNumbers = List(
+    "!AIVDM,0,1,,B,35Mtp?0016J5ohD?ofRWSF2R0000,0*28",
+    "!AIVDM,1,2,,A,133REv0P00P=K?TMDH6P0?vN289>,0*46",
+    "!AIVDM,0,3,,B,139eb:PP00PIHDNMdd6@0?vN2D2s,0*43")
+
+    "tryFieldThreeLteTwo" should "return Success(msg) for valid field numbers" in {
+    validAivdm.foreach(
+      sntnc => {
+        AisSentenceValidity.tryFieldThreeLteTwo(Try(sntnc)) match {
+          case Success(msg) => assert(msg === sntnc)
+          case Failure(e) =>
+            fail("tryFieldThreeLteTwo returned Failure for valid field numbers")
+        }
+      })
+  }
+
+  it should "return Failure(e) for invalid field numbers" in {
+    invalidFieldNumbers.foreach(
+      sntnc => {
+        AisSentenceValidity.tryFieldThreeLteTwo(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryFieldThreeLteTwo returned Success for invalid field numbers")
+          case Failure(e) =>
+            assert(e.getMessage ===
+              "Invalid AIS Sentence: Field 3 greater than field 2")
+        }
+      })
+  }
+
+  it should "pass on Failure(e) unchanged" in {
+    val triedFieldNum = AisSentenceValidity.tryFieldThreeLteTwo(testFailure)
+
+    triedFieldNum match {
+      case Success(msg) =>
+        fail("tryFieldThreeLteTwo returned Success when input Failure(e)")
+      case Failure(e) => assert(e.getMessage ===
+        "Invalid AIS Sentence: test message")
+    }
+  }
+
+val invalidFifthFields = List(
+    "!AIVDM,1,1,,C,13cUpi0qiM0g6jpHrSE1F@rP0d0q,0*3A",
+"!AIVDM,1,1,,a,13PfTH002D05e0rM6oN8Oo6R05Ip,0*43",
+"!AIVDM,1,1,,3,19NP0102BB2>ctkfmaB@0c>P0000,0*15",
+"!AIVDM,1,1,,0,239K6?50010CTGTMH5gad:TR08:O,0*7C",
+"!AIVDM,1,1,,TEST,14eGqlPP00L>h5tK=f7=5wwL05Ip,0*18"
+)
+
+  "tryFieldFiveValid" should "return Success(msg) for valid fifth field" in {
+    validAivdm.foreach(
+      sntnc => {
+        AisSentenceValidity.tryFieldFiveValid(Try(sntnc)) match {
+          case Success(msg) => assert(msg === sntnc)
+          case Failure(e) => { println(sntnc)
+            fail("tryFieldFiveValid returned Failure for valid field numbers")}
+        }
+      })
+  }
+
+  it should "return Failure(e) for invalid fifth field" in {
+    invalidFifthFields.foreach(
+      sntnc => {
+        AisSentenceValidity.tryFieldFiveValid(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryFieldFiveValid returned Success for invalid fifth field")
+          case Failure(e) =>
+            assert(e.getMessage ===
+              "Invalid AIS Sentence: Field 5 is not 'A', 'B', '1', '2' or empty")
+        }
+      })
+  }
+
+  it should "pass on Failure(e) unchanged" in {
+    val triedFifthField = AisSentenceValidity.tryFieldFiveValid(testFailure)
+
+    triedFifthField match {
+      case Success(msg) =>
+        fail("triedFifthField returned Success when input Failure(e)")
+      case Failure(e) => assert(e.getMessage ===
+        "Invalid AIS Sentence: test message")
+    }
+  }
+
 }

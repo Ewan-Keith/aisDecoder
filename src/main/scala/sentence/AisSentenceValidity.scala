@@ -57,8 +57,8 @@ object AisSentenceValidity {
   // check that field 3 isn't greater than field 2
   def tryFieldThreeLteTwo(sentence: Try[String]): Try[String] =
     validChkFactory(
-      x => x.split(',')(1) <= x.split(',')(2),
-      "Field 2 greater than field 3")(sentence)
+      x => x.split(',')(2) <= x.split(',')(1),
+      "Field 3 greater than field 2")(sentence)
 
   // check that field 5 is 'A', 'B', '1', '2' or empty (all appear in the wild)
   def tryFieldFiveValid(sentence: Try[String]): Try[String] =

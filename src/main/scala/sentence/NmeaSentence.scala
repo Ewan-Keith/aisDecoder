@@ -5,6 +5,7 @@ import scala.util.{ Try, Success, Failure }
 case class NmeaSentence(sentence: String) {
 
   // defines a List representation of the string split by comma
+  // TODO rather than wrap in a try the split should come after the fully composed nmea validity checks
     def asList: Try[List[String]] = Try(sentence.split(',').toList)
 
   //  // define NMEA sentence validity checks
