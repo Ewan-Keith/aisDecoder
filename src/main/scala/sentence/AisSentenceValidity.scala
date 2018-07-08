@@ -53,6 +53,10 @@ object AisSentenceValidity {
     validChkFactory(
       x => NmeaChecksum.isValid(x),
       "Checksum is invalid")(sentence)
+      
+        // compose checksum checks into one test
+  def tryChecksum: Try[String] => Try[String] =
+    tryChecksumValid _ compose tryChecksumPresent _
 
   // check that field 3 isn't greater than field 2
   def tryFieldThreeLteTwo(sentence: Try[String]): Try[String] =
@@ -65,10 +69,6 @@ object AisSentenceValidity {
     validChkFactory(
       x => List("A", "B", "1", "2", "").contains(x.split(',')(4)),
       "Field 5 is not 'A', 'B', '1', '2' or empty")(sentence)
-
-  // compose checksum checks into one test
-  def tryChecksum: Try[String] => Try[String] =
-    tryChecksumValid _ compose tryChecksumPresent _
   
     
     // compose checksum checks with rest of the AIS specific checks

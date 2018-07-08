@@ -51,7 +51,11 @@ class AisSentenceValiditySpec extends FlatSpec {
   }
 
   val invalidIdent =
-    List("test,123,456", "!AIVD0,123,456", "!AVDM,1,1", "$AIVDM,1")
+    List(
+      "!IVDM,1,1,,B,13cUpi0qiM0g6jpHrSE1F@rP0d0q,0*3A",
+      ",1,1,,B,13PfTH002D05e0rM6oN8Oo6R05Ip,0*43",
+      "$AIVDM,1,1,,B,19NP0102BB2>ctkfmaB@0c>P0000,0*15",
+      "55,1,1,,B,239K6?50010CTGTMH5gad:TR08:O,0*7C")
 
   "tryValidIdent" should "return Success(msg) for message with valid ident" in {
     validAivdm.foreach(
@@ -88,7 +92,11 @@ class AisSentenceValiditySpec extends FlatSpec {
     }
   }
 
-  val absentChecksum = List("test*O2", "test02", "test*0", "123*012")
+  val absentChecksum = List(
+    "!AIVDM,1,1,,B,13cUpi0qiM0g6jpHrSE1F@rP0d0q,0*3AW",
+    "!AIVDM,1,1,,B,13PfTH002D05e0rM6oN8Oo6R05Ip,0*",
+    "!AIVDM,1,1,,B,19NP0102BB2>ctkfmaB@0c>P0000,0*1",
+    "!AIVDM,1,1,,B,239K6?50010CTGTMH5gad:TR08:O,0*ZZ")
 
   "tryChecksumPresent" should "return Success(msg) for message with nmea checksum" in {
     validAivdm.foreach(
@@ -164,12 +172,60 @@ class AisSentenceValiditySpec extends FlatSpec {
     }
   }
 
+  "tryChecksum" should "return Success(msg) for message with valid nmea checksum" in {
+    validAivdm.foreach(
+      sntnc => {
+        AisSentenceValidity.tryChecksum(Try(sntnc)) match {
+          case Success(msg) => assert(msg === sntnc)
+          case Failure(e) =>
+            fail("tryChecksum returned Failure for valid sentence")
+        }
+      })
+  }
+
+  it should "return Failure(e) for  mis-formatted or missing checksum" in {
+    absentChecksum.foreach(
+      sntnc => {
+        AisSentenceValidity.tryChecksum(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryChecksum returned Success for invalid or missing checksum")
+          case Failure(e) =>
+            assert(e.getMessage ===
+              "Invalid AIS Sentence: No valid checksum provided")
+        }
+      })
+  }
+
+  it should "return Failure(e) for invalid checksum" in {
+    invalidChecksum.foreach(
+      sntnc => {
+        AisSentenceValidity.tryChecksum(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryChecksum returned Success for invalid or missing checksum")
+          case Failure(e) =>
+            assert(e.getMessage ===
+              "Invalid AIS Sentence: Checksum is invalid")
+        }
+      })
+  }
+
+  it should "pass on Failure(e) unchanged" in {
+    val triedChksm = AisSentenceValidity.tryChecksum(testFailure)
+
+    triedChksm match {
+      case Success(msg) =>
+        fail("tryChecksum returned Success when input Failure(e)")
+      case Failure(e) => assert(e.getMessage ===
+        "Invalid AIS Sentence: test message")
+    }
+  }
+
   val invalidFieldNumbers = List(
     "!AIVDM,0,1,,B,35Mtp?0016J5ohD?ofRWSF2R0000,0*28",
     "!AIVDM,1,2,,A,133REv0P00P=K?TMDH6P0?vN289>,0*46",
     "!AIVDM,0,3,,B,139eb:PP00PIHDNMdd6@0?vN2D2s,0*43")
 
-    "tryFieldThreeLteTwo" should "return Success(msg) for valid field numbers" in {
+  "tryFieldThreeLteTwo" should "return Success(msg) for valid field numbers" in {
     validAivdm.foreach(
       sntnc => {
         AisSentenceValidity.tryFieldThreeLteTwo(Try(sntnc)) match {
@@ -204,21 +260,22 @@ class AisSentenceValiditySpec extends FlatSpec {
     }
   }
 
-val invalidFifthFields = List(
+  val invalidFifthFields = List(
     "!AIVDM,1,1,,C,13cUpi0qiM0g6jpHrSE1F@rP0d0q,0*3A",
-"!AIVDM,1,1,,a,13PfTH002D05e0rM6oN8Oo6R05Ip,0*43",
-"!AIVDM,1,1,,3,19NP0102BB2>ctkfmaB@0c>P0000,0*15",
-"!AIVDM,1,1,,0,239K6?50010CTGTMH5gad:TR08:O,0*7C",
-"!AIVDM,1,1,,TEST,14eGqlPP00L>h5tK=f7=5wwL05Ip,0*18"
-)
+    "!AIVDM,1,1,,a,13PfTH002D05e0rM6oN8Oo6R05Ip,0*43",
+    "!AIVDM,1,1,,3,19NP0102BB2>ctkfmaB@0c>P0000,0*15",
+    "!AIVDM,1,1,,0,239K6?50010CTGTMH5gad:TR08:O,0*7C",
+    "!AIVDM,1,1,,TEST,14eGqlPP00L>h5tK=f7=5wwL05Ip,0*18")
 
   "tryFieldFiveValid" should "return Success(msg) for valid fifth field" in {
     validAivdm.foreach(
       sntnc => {
         AisSentenceValidity.tryFieldFiveValid(Try(sntnc)) match {
           case Success(msg) => assert(msg === sntnc)
-          case Failure(e) => { println(sntnc)
-            fail("tryFieldFiveValid returned Failure for valid field numbers")}
+          case Failure(e) => {
+            println(sntnc)
+            fail("tryFieldFiveValid returned Failure for valid field numbers")
+          }
         }
       })
   }
@@ -242,6 +299,108 @@ val invalidFifthFields = List(
     triedFifthField match {
       case Success(msg) =>
         fail("triedFifthField returned Success when input Failure(e)")
+      case Failure(e) => assert(e.getMessage ===
+        "Invalid AIS Sentence: test message")
+    }
+  }
+
+  "tryValidity" should "return Success(msg) for valid fifth field" in {
+    validAivdm.foreach(
+      sntnc => {
+        AisSentenceValidity.tryValidity(Try(sntnc)) match {
+          case Success(msg) => assert(msg === sntnc)
+          case Failure(e) => {
+            println(sntnc)
+            fail("tryValidity returned Failure for valid field numbers")
+          }
+        }
+      })
+  }
+
+  it should "return Failure(e) for non-7 field messages" in {
+    invalidLength.foreach(
+      sntnc => {
+        AisSentenceValidity.tryValidity(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryValidity returned Success for invalid length")
+          case Failure(e) =>
+            assert(e.getMessage ===
+              "Invalid AIS Sentence: Number of fields != 7")
+        }
+      })
+  }
+
+  it should "return Failure(e) for invalid ident messages" in {
+    invalidIdent.foreach(
+      sntnc => {
+        AisSentenceValidity.tryValidity(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryValidity returned Success for invalid identifier")
+          case Failure(e) =>
+            assert(e.getMessage ===
+              "Invalid AIS Sentence: Not valid AIS identifier")
+        }
+      })
+  }
+
+  it should "return Failure(e) for  mis-formatted or missing checksum" in {
+    absentChecksum.foreach(
+      sntnc => {
+        AisSentenceValidity.tryValidity(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryValidity returned Success for invalid or missing checksum")
+          case Failure(e) =>
+            assert(e.getMessage ===
+              "Invalid AIS Sentence: No valid checksum provided")
+        }
+      })
+  }
+
+  it should "return Failure(e) for invalid checksum" in {
+    invalidChecksum.foreach(
+      sntnc => {
+        AisSentenceValidity.tryValidity(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryValidity returned Success for invalid or missing checksum")
+          case Failure(e) =>
+            assert(e.getMessage ===
+              "Invalid AIS Sentence: Checksum is invalid")
+        }
+      })
+  }
+
+  it should "return Failure(e) for invalid field numbers" in {
+    invalidFieldNumbers.foreach(
+      sntnc => {
+        AisSentenceValidity.tryValidity(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryValidity returned Success for invalid field numbers")
+          case Failure(e) =>
+            assert(e.getMessage ===
+              "Invalid AIS Sentence: Field 3 greater than field 2")
+        }
+      })
+  }
+
+  it should "return Failure(e) for invalid fifth field" in {
+    invalidFifthFields.foreach(
+      sntnc => {
+        AisSentenceValidity.tryValidity(Try(sntnc)) match {
+          case Success(msg) =>
+            fail("tryValidity returned Success for invalid fifth field")
+          case Failure(e) =>
+            assert(e.getMessage ===
+              "Invalid AIS Sentence: Field 5 is not 'A', 'B', '1', '2' or empty")
+        }
+      })
+  }
+
+  it should "pass on Failure(e) unchanged" in {
+    val triedOverall = AisSentenceValidity.tryValidity(testFailure)
+
+    triedOverall match {
+      case Success(msg) =>
+        fail("tryValidity returned Success when input Failure(e)")
       case Failure(e) => assert(e.getMessage ===
         "Invalid AIS Sentence: test message")
     }
