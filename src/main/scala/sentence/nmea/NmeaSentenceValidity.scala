@@ -1,25 +1,13 @@
-package com.ewankeith.aisdecoder.sentence
+package com.ewankeith.aisdecoder.sentence.nmea
 
 import scala.util.{ Try, Success, Failure }
+import com.ewankeith.aisdecoder.sentence.SentenceValidity
 
-object NmeaSentenceValidity {
+object NmeaSentenceValidity extends SentenceValidity {
 
   // Exception factory
-  private def nmeaExceptionFactory(error: String): Exception =
+  override def exceptionFactory(error: String): Exception =
     new Exception(s"Invalid NMEA Sentence: $error")
-
-  // define validity check factory
-  private def validChkFactory(
-    condition: String => Boolean, error: String): Try[String] => Try[String] = {
-    sentence: Try[String] =>
-      sentence match {
-        case Success(sntnc) if (condition(sntnc)) =>
-          Try(sntnc)
-        case Success(sntnc) if !(condition(sntnc)) =>
-          Failure(nmeaExceptionFactory(error))
-        case Failure(e) => Failure(e)
-      }
-  }
 
   // define a comma structure checker
   def tryCommaStructure(sentence: Try[String]): Try[String] =

@@ -1,4 +1,4 @@
-package com.ewankeith.aisdecoder.sentence
+package com.ewankeith.aisdecoder.sentence.nmea
 
 import scala.io.Source
 import org.scalatest.FlatSpec

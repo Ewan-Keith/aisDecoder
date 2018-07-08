@@ -1,8 +1,9 @@
-package com.ewankeith.aisdecoder.sentence
+package com.ewankeith.aisdecoder.sentence.nmea.ais
 
 import scala.util.{ Try, Success, Failure }
+import com.ewankeith.aisdecoder.sentence.SentenceValidity
 
-object AisSentenceValidity {
+object AisSentenceValidity extends SentenceValidity {
 
   // valid field length of AIS messages
   private val validLength = 7
@@ -14,21 +15,8 @@ object AisSentenceValidity {
   } yield starts + ends
 
   // Exception factory
-  private def aisExceptionFactory(error: String): Exception =
+  override def exceptionFactory(error: String): Exception =
     new Exception(s"Invalid AIS Sentence: $error")
-
-  // define validity check factory
-  private def validChkFactory(
-    condition: String => Boolean, error: String): Try[String] => Try[String] = {
-    sentence: Try[String] =>
-      sentence match {
-        case Success(sntnc) if (condition(sntnc)) =>
-          Try(sntnc)
-        case Success(sntnc) if !(condition(sntnc)) =>
-          Failure(aisExceptionFactory(error))
-        case Failure(e) => Failure(e)
-      }
-  }
 
   // check that the sentence has 7 fields
   def tryLengthSeven(sentence: Try[String]): Try[String] =
@@ -51,7 +39,7 @@ object AisSentenceValidity {
   // check that checksum is valid
   def tryChecksumValid(sentence: Try[String]): Try[String] =
     validChkFactory(
-      x => NmeaChecksum.isValid(x),
+      x => testChecksum(x),
       "Checksum is invalid")(sentence)
 
   // compose checksum checks into one test

@@ -1,6 +1,9 @@
-package com.ewankeith.aisdecoder.sentence
+package com.ewankeith.aisdecoder.sentence.nmea
 
 import scala.util.{ Try, Success, Failure }
+import com.ewankeith.aisdecoder.sentence.Sentence
+import com.ewankeith.aisdecoder.sentence.nmea.ais._
+
 
 // class is concrete allowing all nmea sentences a common entry point
 // has a method that attempts to raise NmeaSentence to a specific protocol
