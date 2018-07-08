@@ -8,7 +8,7 @@ object AisSentenceValidity {
   private val validLength = 7
 
   // define all valid identifier for AIS messages
-  private val validIdent = for {
+  val validIdent = for {
     starts <- List("!AD", "!AI", "!AN", "!AR", "!AS", "!AT", "!AX", "!BS", "!SA")
     ends <- List("VDM", "VDO")
   } yield starts + ends
@@ -53,8 +53,8 @@ object AisSentenceValidity {
     validChkFactory(
       x => NmeaChecksum.isValid(x),
       "Checksum is invalid")(sentence)
-      
-        // compose checksum checks into one test
+
+  // compose checksum checks into one test
   def tryChecksum: Try[String] => Try[String] =
     tryChecksumValid _ compose tryChecksumPresent _
 
@@ -69,11 +69,10 @@ object AisSentenceValidity {
     validChkFactory(
       x => List("A", "B", "1", "2", "").contains(x.split(',')(4)),
       "Field 5 is not 'A', 'B', '1', '2' or empty")(sentence)
-  
-    
-    // compose checksum checks with rest of the AIS specific checks
+
+  // compose checksum checks with rest of the AIS specific checks
   def tryValidity: Try[String] => Try[String] = {
-    tryChecksum compose tryFieldFiveValid _ compose 
-    tryFieldThreeLteTwo _ compose tryValidIdent _ compose tryLengthSeven _
+    tryChecksum compose tryFieldFiveValid _ compose
+      tryFieldThreeLteTwo _ compose tryValidIdent _ compose tryLengthSeven _
   }
 }
