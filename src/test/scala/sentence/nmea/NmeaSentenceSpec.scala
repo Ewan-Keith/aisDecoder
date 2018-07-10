@@ -60,4 +60,44 @@ class NmeaSentenceSpec extends FlatSpec {
       })
   }
 
+  "asListTwo" should "define a 8 item list for valid AIS sentences" in {
+    validAivdm.foreach(
+      sntnc => {
+        NmeaSentence(sntnc).asListTwo match {
+          case Success(list) => assert(list.length === 8)
+          case Failure(msg) =>
+            fail("asListTwo returned Failure for valid sentence")
+        }
+      })
+  }
+
+  it should "return failure with invalid comma structure" in {
+    invalidCommaStruct.foreach(
+      sntnc => {
+        NmeaSentence(sntnc).asListTwo match {
+          case Success(list) =>
+            fail("asListTwo returned Success for invalid comma structure")
+          case Failure(e) => assert(e.getMessage ===
+            "Invalid NMEA Sentence: Invalid comma structure")
+        }
+      })
+  }
+
+  val noChecuksum = List(
+    "!AIVDM,1,1,,A,16`l:v8P0W8Vw>fDVB0t8OvJ0H;9,0",
+    "!AIVDM,1,1,,A,169a:nP01g`hm4pB7:E0;@0L088i,0")
+
+  it should "have checksum None if not specified" in {
+    noChecuksum.foreach(
+      sntnc => {
+        NmeaSentence(sntnc).asListTwo match {
+          case Success(list) => assert(list.reverse.head === None)
+          case Failure(msg) => {
+            println(msg)
+            fail("asListTwo returned Failure for valid sentence")
+          }
+        }
+      })
+  }
+
 }

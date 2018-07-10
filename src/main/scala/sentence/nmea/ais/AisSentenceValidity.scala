@@ -30,22 +30,6 @@ object AisSentenceValidity extends SentenceValidity {
       x => validIdent.contains(x.split(',').head),
       "Not valid AIS identifier")(sentence)
 
-  // check that checksum is used (mandatory for AIS messages)
-  def tryChecksumPresent(sentence: Try[String]): Try[String] =
-    validChkFactory(
-      x => x.matches("^.*\\*[0-9a-fA-F]{2}$"),
-      "No valid checksum provided")(sentence)
-
-  // check that checksum is valid
-  def tryChecksumValid(sentence: Try[String]): Try[String] =
-    validChkFactory(
-      x => testChecksum(x),
-      "Checksum is invalid")(sentence)
-
-  // compose checksum checks into one test
-  def tryChecksum: Try[String] => Try[String] =
-    tryChecksumValid _ compose tryChecksumPresent _
-
   // check that field 3 isn't greater than field 2
   def tryFieldThreeLteTwo(sentence: Try[String]): Try[String] =
     validChkFactory(

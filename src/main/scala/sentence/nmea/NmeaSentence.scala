@@ -12,10 +12,10 @@ case class NmeaSentence(sentence: String) extends Sentence(sentence) {
   // returns success(sentence) if valid, else returns informative failure
   override val isValid: Try[String] = NmeaSentenceValidity.tryValidity(Try(sentence))
 
-  // use the protocol to try and construct a specific sentence object.
+  // use the tag to try and construct a specific sentence object.
   val raiseProtocol: Try[Sentence] = {
     this.isValid match {
-      case Success(sntnc) if AisSentenceValidity.validIdent contains this.protocol =>
+      case Success(sntnc) if AisSentenceValidity.validIdent contains this.tag =>
         Try(AisSentence(sntnc))
       case Failure(e) => Failure(e)
       case _ =>

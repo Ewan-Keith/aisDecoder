@@ -20,6 +20,12 @@ abstract class SentenceValidity {
       }
   }
 
+  // check that checksum is used (mandatory for AIS messages)
+  def tryChecksumPresent(sentence: Try[String]): Try[String] =
+    validChkFactory(
+      x => x.matches("^.*\\*[0-9a-fA-F]{2}$"),
+      "No valid checksum provided")(sentence)
+
   // checks the sentence checksum for validity
   def testChecksum(sentence: String): Boolean = {
     val extractChecks = "!(.*)\\*([0-9a-fA-F]{2})$".r
@@ -33,5 +39,15 @@ abstract class SentenceValidity {
 
     checksumFormatted == checkSum
   }
+
+  // check that checksum is valid
+  def tryChecksumValid(sentence: Try[String]): Try[String] =
+    validChkFactory(
+      x => testChecksum(x),
+      "Checksum is invalid")(sentence)
+
+  // compose checksum checks into one test
+  def tryChecksum: Try[String] => Try[String] =
+    tryChecksumValid _ compose tryChecksumPresent _
 
 }
