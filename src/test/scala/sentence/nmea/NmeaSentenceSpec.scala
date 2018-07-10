@@ -37,36 +37,36 @@ class NmeaSentenceSpec extends FlatSpec {
       })
   }
 
-  "asList" should "define a 7 item list for valid AIS sentences" in {
+//  "asList" should "define a 7 item list for valid AIS sentences" in {
+//    validAivdm.foreach(
+//      sntnc => {
+//        NmeaSentence(sntnc).asList match {
+//          case Success(list) => assert(list.length === 7)
+//          case Failure(msg) =>
+//            fail("NmeaSentence.asList returned Failure for valid sentence")
+//        }
+//      })
+//  }
+//
+//  it should "return failure with invalid comma structure" in {
+//    invalidCommaStruct.foreach(
+//      sntnc => {
+//        NmeaSentence(sntnc).asList match {
+//          case Success(list) =>
+//            fail("NmeaSentence.asList returned Success for invalid comma structure")
+//          case Failure(e) => assert(e.getMessage ===
+//            "Invalid NMEA Sentence: Invalid comma structure")
+//        }
+//      })
+//  }
+
+  "asList" should "define a 8 item list for valid AIS sentences" in {
     validAivdm.foreach(
       sntnc => {
         NmeaSentence(sntnc).asList match {
-          case Success(list) => assert(list.length === 7)
-          case Failure(msg) =>
-            fail("NmeaSentence.asList returned Failure for valid sentence")
-        }
-      })
-  }
-
-  it should "return failure with invalid comma structure" in {
-    invalidCommaStruct.foreach(
-      sntnc => {
-        NmeaSentence(sntnc).asList match {
-          case Success(list) =>
-            fail("NmeaSentence.asList returned Success for invalid comma structure")
-          case Failure(e) => assert(e.getMessage ===
-            "Invalid NMEA Sentence: Invalid comma structure")
-        }
-      })
-  }
-
-  "asListTwo" should "define a 8 item list for valid AIS sentences" in {
-    validAivdm.foreach(
-      sntnc => {
-        NmeaSentence(sntnc).asListTwo match {
           case Success(list) => assert(list.length === 8)
           case Failure(msg) =>
-            fail("asListTwo returned Failure for valid sentence")
+            fail("asList returned Failure for valid sentence")
         }
       })
   }
@@ -74,9 +74,9 @@ class NmeaSentenceSpec extends FlatSpec {
   it should "return failure with invalid comma structure" in {
     invalidCommaStruct.foreach(
       sntnc => {
-        NmeaSentence(sntnc).asListTwo match {
+        NmeaSentence(sntnc).asList match {
           case Success(list) =>
-            fail("asListTwo returned Success for invalid comma structure")
+            fail("asList returned Success for invalid comma structure")
           case Failure(e) => assert(e.getMessage ===
             "Invalid NMEA Sentence: Invalid comma structure")
         }
@@ -90,11 +90,11 @@ class NmeaSentenceSpec extends FlatSpec {
   it should "have checksum None if not specified" in {
     noChecuksum.foreach(
       sntnc => {
-        NmeaSentence(sntnc).asListTwo match {
+        NmeaSentence(sntnc).asList match {
           case Success(list) => assert(list.reverse.head === None)
           case Failure(msg) => {
             println(msg)
-            fail("asListTwo returned Failure for valid sentence")
+            fail("asList returned Failure for valid sentence")
           }
         }
       })
